@@ -199,7 +199,18 @@ func (c *Conn) Top() error {
 }
 
 func (c *Conn) Resize(r image.Rectangle) error {
-	panic("unimplemented")
+	// This is expected to fail if the program is not running in rio
+	f, err := os.OpenFile("/dev/wctl", os.O_WRONLY, 0)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(f, "resize -r %d %d %d %d\n", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y)
+	if err != nil {
+		return err
+	}
+
+	return f.Close()
 }
 
 func (c *Conn) ReadDraw(b []byte) (n int, err error) {
